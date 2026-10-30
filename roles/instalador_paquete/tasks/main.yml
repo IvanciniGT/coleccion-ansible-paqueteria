@@ -14,7 +14,6 @@
 
 - name:                               Normalizar la información de la distribución
   ansible.builtin.set_fact:
-    ansible_facts:
       distribucion_normalizada:       "{{ ansible_facts.os_family | lower }}"
   tags:
     - always
@@ -52,12 +51,14 @@
     name:                             miempresa.paqueteria.instalador_paquete_concreto
   vars:
       paquete:                        "{{ paquete_concreto.nombre }}"
-      version:                        "{{ paquete_concreto.version.name | default(omit, true) }}"
-                                                              # omit: Si no se especifica, ansible no pasa la variable "version" al role
-      operador_version:               "{{ paquete_concreto.version.operator | default(omit, true) }}"
-      repositorio:                    "{{ paquete_concreto.repo.url | default(omit, true) }}"
-      clave:                          "{{ paquete_concreto.repo.key | default(omit, true) }}"          # URL de la clave GPG del repositorio
-      suite:                          "{{ paquete_concreto.repo.suite | default(omit, true) }}"          # Solo Debian/Ubuntu. Vacía: la de la versión del host (noble, jammy...)
-      componentes:                    "{{ paquete_concreto.repo.componentes | default(omit, true) }}"          # Solo Debian/Ubuntu: componentes del repositorio
+      # Aquí NO vale default(omit): en vars de include_role, omit no quita la variable,
+      # le llega al role como un valor raro y "repositorio | length" revienta.
+      # Se pasan los mismos valores por defecto que tiene instalador_paquete_concreto.
+      version:                        "{{ paquete_concreto.version.name | default('', true) }}"
+      operador_version:               "{{ paquete_concreto.version.operator | default('=', true) }}"
+      repositorio:                    "{{ paquete_concreto.repo.url | default('', true) }}"
+      clave:                          "{{ paquete_concreto.repo.key | default('', true) }}"          # URL de la clave GPG del repositorio
+      suite:                          "{{ paquete_concreto.repo.suite | default('', true) }}"          # Solo Debian/Ubuntu. Vacía: la de la versión del host (noble, jammy...)
+      componentes:                    "{{ paquete_concreto.repo.componentes | default(['main'], true) }}"          # Solo Debian/Ubuntu: componentes del repositorio
   tags:
     - always

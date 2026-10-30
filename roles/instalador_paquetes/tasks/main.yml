@@ -14,7 +14,6 @@
 
 - name:                               Normalizar la información de la distribución
   ansible.builtin.set_fact:
-    ansible_facts:
       distribucion_normalizada:       "{{ ansible_facts.os_family | lower }}"
   tags:
     - always
